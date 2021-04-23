@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<ViewerSettings>
+	<Viewers>
+		<Viewer1 camera="left_fish"/>
+		<Viewer2 camera="right_fish"/>
+		<Viewer3 camera="front_fish"/>
+		<Viewer4 camera="back_fish"/>
+	</Viewers>
+	<Layout>
+		<splitter horizontal="True" left="350" right="349"/>
+		<splitter2 horizontal="True" left="350" right="349"/>
+		<splitter3 horizontal="False" left="295" right="294"/>
+	</Layout>
+</ViewerSettings>
