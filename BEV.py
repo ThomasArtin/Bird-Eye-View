@@ -5,9 +5,11 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 import pickle
+import time
 
 
-def read_TCP_image(data):
+
+def read_TCP_image(data,Res = 640*480):
     imagenumpy = np.array(data,dtype = np.uint8)
     R1 = imagenumpy[0:Res].reshape((H,W))
     G1 = imagenumpy[Res:Res*2].reshape((H,W))
@@ -33,6 +35,8 @@ def load_calibration_params(calibration_file_path):
     return calibration_params
 
 def undistort_fisheye_no_files(calibration_params,img,side):
+    start = time.time()
+
     K,D,DIM = calibration_params
     distorted = img
     K_new = K.copy()
@@ -42,7 +46,18 @@ def undistort_fisheye_no_files(calibration_params,img,side):
     elif side == 'front' or side == 'back':
         K_new[0,0] = K[0,0]/2
         K_new[1,1] = K[1,1]/2
+
+    end = time.time()
+
+    print(f'undistort load params : {(end - start)}')
+
+    start = time.time()
+
     undistorted_img = cv2.fisheye.undistortImage(distorted,K,D,None,K_new)
+
+    end = time.time()
+
+    print(f'undistort undistort fish opencv : {(end - start)}')
     return undistorted_img
 
 
@@ -153,16 +168,30 @@ def stitch(warped,car_symbol):
 
 def bird_eye_view(frames, calibration_params, car_symbol, img_dim = [640,480]):
 
+    start = time.time()
+
     sizeimg = img_dim[0]*img_dim[1]*(3*1)
 
     imgL,imgR,imgT,imgB = frames
     
     calibration_params_left,calibration_params_right,calibration_params_front,calibration_params_back = calibration_params
 
+    end = time.time()
+
+    print(f'loading : {(end - start)}')
+
+    start = time.time()
+
     undistL = undistort_fisheye_no_files(calibration_params_left,imgL,'left')
     undistR = undistort_fisheye_no_files(calibration_params_right,imgR,'right')
     undistF = undistort_fisheye_no_files(calibration_params_front,imgT,'front')
     undistB = undistort_fisheye_no_files(calibration_params_back,imgB,'back')
+
+    end = time.time()
+
+    print(f'undistort : {(end - start)}')
+
+    start = time.time()
 
     warped = [0]*4
 
@@ -171,7 +200,17 @@ def bird_eye_view(frames, calibration_params, car_symbol, img_dim = [640,480]):
     warped[2] = percpective_transform_no_files(undistF,calibration_params_front,'ront')
     warped[3] = percpective_transform_no_files(undistB,calibration_params_back,'back')
 
+    end = time.time()
+
+    print(f'warp : {(end - start)}')
+
+    start = time.time()
+
     bird_view = stitch(warped,car_symbol)
+
+    end = time.time()
+
+    print(f'stitch : {(end - start)}')
 
     return bird_view
 
